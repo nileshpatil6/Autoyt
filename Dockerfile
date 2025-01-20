@@ -1,24 +1,20 @@
-# Use an official Python runtime as a parent image
-FROM python:3.12
+# Use an official Node.js runtime as the base image
+FROM node:14
 
-# Set environment variables for Python
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+# Set the working directory in the container
+WORKDIR /usr/src/app
 
-# Set the working directory to /code
-WORKDIR /code
+# Copy package.json and package-lock.json to the working directory
+COPY package*.json ./
 
-# Copy only the requirements file
-COPY requirements.txt /code/
+# Install dependencies
+RUN npm install
 
-# Install any needed packages specified in requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+# Copy the rest of the application code to the working directory
+COPY . .
 
-# Copy the current directory contents into the container at /code
-COPY . /code/
+# Expose the port the app runs on
+EXPOSE 3000
 
-# Expose the port that the app will run on
-EXPOSE 8000
-
-# Run the application
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+# Command to run the application
+CMD ["node", "app.js"]
