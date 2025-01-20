@@ -1,20 +1,27 @@
-# Use an official Node.js runtime as the base image
-FROM node:14
+# Use an official Python runtime as the base image
+FROM python:3.9-slim
+
+# Install wget
+RUN apt-get update && apt-get install -y wget && rm -rf /var/lib/apt/lists/*
 
 # Set the working directory in the container
-WORKDIR /usr/src/app
+WORKDIR /app
 
-# Copy package.json and package-lock.json to the working directory
-COPY package*.json ./
+# Copy the requirements file into the container
+COPY requirements.txt .
 
-# Install dependencies
-RUN npm install
+# Install the required packages
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of the application code to the working directory
+# Download required files
+RUN wget https://huggingface.co/datasets/API-Handler/DDC-Free-API/resolve/main/api_handler.py && \
+    wget https://huggingface.co/datasets/API-Handler/DDC-Free-API/resolve/main/main.py
+
+# Copy the rest of the application code into the container
 COPY . .
 
-# Expose the port the app runs on
-EXPOSE 3000
+# Expose the port that FastAPI will run on
+EXPOSE 7860
 
-# Command to run the application
-CMD ["node", "app.js"]
+# Command to run the FastAPI application
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "7860"]
