@@ -1,19 +1,24 @@
-# Use Python base image
-FROM python:3.11-slim
+# Use an official Python runtime as a parent image
+FROM python:3.12
 
-# Install system dependencies for Playwright
-RUN apt-get update && apt-get install -y wget libnss3 libatk1.0-0 libdrm2 libxcomposite1 libxrandr2 libxdamage1 libxkbcommon0 libgbm-dev
+# Set environment variables for Python
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
 
-# Install Playwright and browser dependencies
-RUN pip install --upgrade pip && pip install playwright==1.39.0
-RUN playwright install --with-deps
+# Set the working directory to /code
+WORKDIR /code
 
-# Copy the script and requirements
-WORKDIR /app
-COPY . .
+# Copy only the requirements file
+COPY requirements.txt /code/
 
-# Install Python dependencies
-RUN pip install -r requirements.txt
+# Install any needed packages specified in requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Command to run the script
-CMD ["python", "playwright-login-script.py"]
+# Copy the current directory contents into the container at /code
+COPY . /code/
+
+# Expose the port that the app will run on
+EXPOSE 8000
+
+# Run the application
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
